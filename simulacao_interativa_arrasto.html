@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulação de Arrasto em Satélites</title>
+  <style>
+    body { margin: 0; background: #111; color: white; font-family: Arial, sans-serif; text-align: center; }
+    canvas { display: block; margin: 0 auto; background: linear-gradient(to bottom, #001f3f 50%, #3f0000 50%); }
+    .controls { margin: 10px; }
+    label { display: inline-block; width: 120px; }
+    input[type=range] { width: 200px; }
+  </style>
+</head>
+<body>
+  <h2>Simulação de Arrasto em Satélites - Interativa</h2>
+  <p>Compare o movimento dos satélites em regiões com e sem tempestade geomagnética. Ajuste os parâmetros abaixo:</p>
+  <div class="controls">
+    <label>Densidade</label>
+    <input id="density" type="range" min="1" max="10" value="5"><span id="densityVal">5</span>
+  </div>
+  <div class="controls">
+    <label>Temperatura</label>
+    <input id="temperature" type="range" min="1" max="10" value="5"><span id="temperatureVal">5</span>
+  </div>
+  <div class="controls">
+    <label>Velocidade Inicial</label>
+    <input id="velocity" type="range" min="1" max="10" value="5"><span id="velocityVal">5</span>
+  </div>
+  <canvas id="simCanvas" width="800" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    let density = 5, temperature = 5, velocity = 5;
+    let frame = 0, maxFrames = 400;
+
+    let blockTop = { x: 50, y: 100 };
+    let blockBottom = { x: 50, y: 300 };
+
+    let particlesTop = [], particlesBottom = [];
+
+    function resetParticles() {
+      particlesTop = [], particlesBottom = [];
+      for (let i = 0; i < 20 * density; i++) {
+        particlesTop.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height / 2, vx: Math.random() * 0.5 * temperature, color: `rgba(0, ${Math.floor(100 + temperature * 15)}, 255, 0.5)` });
+      }
+      for (let i = 0; i < 40 * density; i++) {
+        particlesBottom.push({ x: Math.random() * canvas.width, y: canvas.height / 2 + Math.random() * canvas.height / 2, vx: Math.random() * 1.0 * temperature, color: `rgba(255, ${Math.floor(180 - temperature * 10)}, 0, 0.6)` });
+      }
+    }
+
+    function drawParticles(particles) {
+      for (let p of particles) {
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI);
+        ctx.fill();
+        p.x -= p.vx;
+        if (p.x < 0) p.x = canvas.width;
+      }
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Linhas horizontais de referência
+      ctx.strokeStyle = "rgba(255,255,255,0.2)";
+      ctx.setLineDash([3, 4]);
+      for (let y = 20; y < canvas.height; y += 20) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      drawParticles(particlesTop);
+      drawParticles(particlesBottom);
+
+      // Linha divisória central
+      ctx.strokeStyle = "white";
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Títulos
+      ctx.fillStyle = "white";
+      ctx.fillText("Região sem tempestade", 20, 20);
+      ctx.fillText("Região com tempestade", 20, canvas.height / 2 + 20);
+
+      // Blocos
+      ctx.fillStyle = "deepskyblue";
+      ctx.fillRect(blockTop.x, blockTop.y, 20, 20);
+
+      ctx.fillStyle = "crimson";
+      ctx.fillRect(blockBottom.x, blockBottom.y, 20, 20);
+
+      // Atualiza posições dos blocos
+      blockTop.x += 1.5;
+      blockBottom.x += 1.5;
+      blockTop.y += 0.03 * density;
+      blockBottom.y += 0.08 * density;
+
+      frame++;
+      if (frame >= maxFrames) {
+        frame = 0;
+        blockTop = { x: 50, y: 100 - velocity * 5 };
+        blockBottom = { x: 50, y: 300 - velocity * 5 };
+        resetParticles();
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    document.getElementById('density').oninput = (e) => {
+      density = parseInt(e.target.value);
+      document.getElementById('densityVal').textContent = density;
+      resetParticles();
+    };
+    document.getElementById('temperature').oninput = (e) => {
+      temperature = parseInt(e.target.value);
+      document.getElementById('temperatureVal').textContent = temperature;
+      resetParticles();
+    };
+    document.getElementById('velocity').oninput = (e) => {
+      velocity = parseInt(e.target.value);
+      document.getElementById('velocityVal').textContent = velocity;
+      blockTop = { x: 50, y: 100 - velocity * 5 };
+      blockBottom = { x: 50, y: 300 - velocity * 5 };
+    };
+
+    resetParticles();
+    update();
+  </script>
+</body>
+</html>
