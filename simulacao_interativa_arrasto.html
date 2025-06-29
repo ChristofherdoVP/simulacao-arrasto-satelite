@@ -23,14 +23,14 @@
     <input id="temperature" type="range" min="1" max="10" value="5"><span id="temperatureVal">5</span>
   </div>
   <div class="controls">
-    <label>Velocidade Inicial</label>
-    <input id="velocity" type="range" min="1" max="10" value="5"><span id="velocityVal">5</span>
+    <label>Altura Inicial</label>
+    <input id="altitude" type="range" min="1" max="10" value="5"><span id="altitudeVal">5</span>
   </div>
   <canvas id="simCanvas" width="800" height="400"></canvas>
   <script>
     const canvas = document.getElementById('simCanvas');
     const ctx = canvas.getContext('2d');
-    let density = 5, temperature = 5, velocity = 5;
+    let density = 5, temperature = 5, altitude = 5;
     let frame = 0, maxFrames = 400;
 
     let blockTop = { x: 50, y: 100 };
@@ -105,8 +105,8 @@
       frame++;
       if (frame >= maxFrames) {
         frame = 0;
-        blockTop = { x: 50, y: 100 - velocity * 5 };
-        blockBottom = { x: 50, y: 300 - velocity * 5 };
+        blockTop = { x: 50, y: 100 - altitude * 5 };
+        blockBottom = { x: 50, y: 300 - altitude * 5 };
         resetParticles();
       }
 
@@ -123,11 +123,11 @@
       document.getElementById('temperatureVal').textContent = temperature;
       resetParticles();
     };
-    document.getElementById('velocity').oninput = (e) => {
-      velocity = parseInt(e.target.value);
-      document.getElementById('velocityVal').textContent = velocity;
-      blockTop = { x: 50, y: 100 - velocity * 5 };
-      blockBottom = { x: 50, y: 300 - velocity * 5 };
+    document.getElementById('altitude').oninput = (e) => {
+      altitude = parseInt(e.target.value);
+      document.getElementById('altitudeVal').textContent = altitude;
+      blockTop = { x: 50, y: 100 - altitude * 5 };
+      blockBottom = { x: 50, y: 300 - altitude * 5 };
     };
 
     resetParticles();
